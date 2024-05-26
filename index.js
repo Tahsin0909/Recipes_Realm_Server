@@ -73,7 +73,16 @@ async function run() {
         app.get('/recipes', async (req, res) => {
             const cursor = RecipesCollection.find()
             const result = await cursor.toArray()
-            res.send(result)
+            const limit = result.length
+            const offset = parseInt(req.query.offset)
+            console.log(offset);
+            if(limit >= offset){
+                const newResult = result.slice(0, offset)
+                res.send(newResult)
+            }
+            else{
+                res.send([...result ,{"warning": "No more Data"}])
+            }
         })
 
 
