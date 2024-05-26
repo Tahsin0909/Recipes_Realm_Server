@@ -75,16 +75,35 @@ async function run() {
             const result = await cursor.toArray()
             const limit = result.length
             const offset = parseInt(req.query.offset)
-            console.log(offset);
-            if(limit >= offset){
+            // console.log(offset);
+            if (limit >= offset) {
                 const newResult = result.slice(0, offset)
                 res.send(newResult)
             }
-            else{
-                res.send([...result ,{"warning": "No more Data"}])
+            else {
+                res.send([...result, { "warning": "No more Data" }])
             }
         })
-
+        app.put('/recipes/:id', async (req, res) => {
+            const Id = req.params.id
+            console.log(Id);
+            const data = req.body;
+            console.log(data);
+            const query = {
+                _id: new ObjectId(Id),
+                watchCount: [data]
+            }
+            const isExist = await RecipesCollection.findOne(query)
+            if (!isExist) {
+                const purchasedBy = {
+                    $push: {
+                        watchCount: data
+                    }
+                }
+                const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, purchasedBy)
+                res.send(result)
+            }
+        })
 
 
 
