@@ -137,6 +137,30 @@ async function run() {
                 res.status(500).send('Internal Server Error');
             }
         });
+
+        // recipes suggestion 
+        app.get('/suggestion', async (req, res) => {
+            const country = req.query.country
+            console.log(country);
+            const category = req.query.category
+            // console.log(offset);
+
+            if (country && !category) {
+                const results = await RecipesCollection.find({ country: `${country}` }).toArray();
+                res.send(results)
+            }
+            else if (!country && category) {
+                const results = await RecipesCollection.find({ category: `${category}` }).toArray();
+                res.send(results)
+            }
+            else if (country && category) {
+                const results = await RecipesCollection.find({ country: `${country}`, category: `${category}` }).toArray();
+                res.send(results)
+            }
+            else {
+                res.send({ "filter": false })
+            }
+        })
         // recipes 
 
 
