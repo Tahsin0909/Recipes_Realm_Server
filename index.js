@@ -86,25 +86,32 @@ async function run() {
         })
         app.put('/recipes/:id', async (req, res) => {
             const Id = req.params.id
-            console.log(Id);
+            // console.log(Id);
             const data = req.body;
-            console.log(data);
+            // console.log(data);
             const query = {
                 _id: new ObjectId(Id),
-                purchasedByt: [data]
+                purchasedBy: data
             }
             const isExist = await RecipesCollection.findOne(query)
+            console.log(isExist);
             if (!isExist) {
                 const purchasedBy = {
                     $push: {
                         purchasedBy: data
                     }
-                } 
+                }
                 const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, purchasedBy)
                 const resultWatchCount = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, { $inc: { watchCount: 1 } })
+
+                const recipesExist = await RecipesCollection.findOne({ _id: new ObjectId(Id) })
+                const chefsCoins = await UserCollection.updateOne({ email: recipesExist.creatorEmail }, { $inc: { coin: 1 } })
+                const purchasedUserCoins = await UserCollection.updateOne({ email: data.email }, { $inc: { coin: -10 } })
                 res.send(result)
             }
-
+            else {
+                res.send({ "AlreadyPurchased": true})
+            }
         })
 
 
