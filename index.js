@@ -91,18 +91,20 @@ async function run() {
             console.log(data);
             const query = {
                 _id: new ObjectId(Id),
-                watchCount: [data]
+                purchasedByt: [data]
             }
             const isExist = await RecipesCollection.findOne(query)
             if (!isExist) {
                 const purchasedBy = {
                     $push: {
-                        watchCount: data
+                        purchasedBy: data
                     }
-                }
+                } 
                 const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, purchasedBy)
+                const resultWatchCount = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, { $inc: { watchCount: 1 } })
                 res.send(result)
             }
+
         })
 
 
