@@ -161,6 +161,39 @@ async function run() {
                 res.send({ "filter": false })
             }
         })
+
+        // reaction on recipes 
+        app.put('/react/:id', async (req, res) => {
+            const Id = req.params.id
+            const data = req.body
+            const query = { _id: new ObjectId(Id), reactBy: data }
+            // const filter = { _id: new ObjectId(Id) }
+            const isExist = await RecipesCollection.findOne(query)
+
+            if (!isExist) {
+                // const isExist2 = await RecipesCollection.findOne(query2)
+                const reactBy = {
+                    $push: {
+                        reactBy: data
+                    }
+                }
+                const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, reactBy)
+                res.send(result)
+            }
+            else if (isExist) {
+
+                const reactBy = {
+                    $pull: {
+                        reactBy: data
+                    }
+                }
+                const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, reactBy)
+                res.send(result)
+            }
+            else{
+                res.send('internal server error')
+            }
+        })
         // recipes 
 
 
