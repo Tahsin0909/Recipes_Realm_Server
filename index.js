@@ -17,7 +17,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
-        strict: true,
+        strict: false,
         deprecationErrors: true,
     }
 });
@@ -34,7 +34,9 @@ async function run() {
         const database = client.db("RecipesRealm")
         const UserCollection = database.collection('User')
         const RecipesCollection = database.collection('Recipes')
+        RecipesCollection.createIndex({ recipeName: "text", recipeDetails: "text", ingredients: "text" });
 
+        // users 
         app.post('/users/:email', async (req, res) => {
             const email = req.params.email
             const user = req.body;
@@ -54,8 +56,9 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+        // users 
 
-
+        // recipes 
         app.post('/recipes/:email', async (req, res) => {
             const recipes = req.body;
             const email = req.params.email
@@ -84,6 +87,9 @@ async function run() {
                 res.send([...result, { "warning": "No more Data" }])
             }
         })
+
+
+        // recipes view detail 
         app.put('/recipes/:id', async (req, res) => {
             const Id = req.params.id
             // console.log(Id);
@@ -110,10 +116,28 @@ async function run() {
                 res.send(result)
             }
             else {
-                res.send({ "AlreadyPurchased": true})
+                res.send({ "AlreadyPurchased": true })
             }
         })
 
+        // recepies search 
+        app.get('/search', async (req, res) => {
+            const searchText = req.query.q;
+            console.log(searchText);
+            const query = { $text: { $search: searchText } };
+            if (!searchText) {
+                return res.status(400).send('Search query is required');
+            }
+
+            try {
+                const results = await RecipesCollection.find(query).toArray();
+                res.send(results)
+            } catch (error) {
+                console.error('Error performing text search:', error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+        // recipes 
 
 
 
