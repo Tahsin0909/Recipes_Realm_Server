@@ -135,7 +135,7 @@ async function run() {
             const query = { _id: new ObjectId(Id) }
             const result = await RecipesCollection.findOne(query)
             const purchased = result.purchasedBy.find(data => data.email == body.email)
-            const owner = result.purchasedBy.creatorEmail == body.email
+            const owner = result.creatorEmail == body.email
             if (purchased) {
                 console.log(purchased);
                 res.send([result, { "status": "Purchased" }])
