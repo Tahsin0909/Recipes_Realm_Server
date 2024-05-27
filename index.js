@@ -144,7 +144,7 @@ async function run() {
                 res.send([result, { "status": "Owner" }])
             }
             else {
-                res.send({ "status": "404" })
+                res.send(result)
             }
 
         })
