@@ -111,7 +111,7 @@ async function run() {
             }
         })
 
-        app.get('/recipes', verifyToken, async (req, res) => {
+        app.get('/recipes', async (req, res) => {
 
             const cursor = RecipesCollection.find()
             const result = await cursor.toArray()
@@ -129,6 +129,27 @@ async function run() {
 
 
         // recipes view detail 
+        app.get('/recipes/:id', verifyToken, async (req, res) => {
+            const Id = req.params.id
+            const body = req.body
+            const query = { _id: new ObjectId(Id) }
+            const result = await RecipesCollection.findOne(query)
+            const purchased = result.purchasedBy.find(data => data.email == body.email)
+            const owner = result.purchasedBy.creatorEmail == body.email
+            if(purchased){
+                console.log(purchased);
+                res.send([result, {"status": "Purchased"}])
+            }
+            else if( owner){
+                res.send([result, {"status": "Owner"}])
+            }
+            else{
+                res.send({"status": "404"})
+            }
+
+        })
+
+
         app.put('/recipes/:id', async (req, res) => {
             const Id = req.params.id
             // console.log(Id);
