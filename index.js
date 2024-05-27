@@ -129,7 +129,7 @@ async function run() {
 
 
         // recipes view detail 
-        app.get('/recipes/:id', verifyToken, async (req, res) => {
+        app.get('/recipes/:id', async (req, res) => {
             const Id = req.params.id
             const body = req.body
             const query = { _id: new ObjectId(Id) }
