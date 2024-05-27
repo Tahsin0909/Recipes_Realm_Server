@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -35,6 +36,39 @@ async function run() {
         const UserCollection = database.collection('User')
         const RecipesCollection = database.collection('Recipes')
         RecipesCollection.createIndex({ recipeName: "text", recipeDetails: "text", ingredients: "text" });
+        //jwt
+
+        app.post('/jwt', async (req, res) => {
+            const email = req.body
+            console.log(email);
+            const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send(token)
+        })
+
+        // middlewares 
+        const verifyToken = (req, res, next) => {
+            // console.log(req);
+            const authorizationHeader = req.headers['authorization'];
+            const token = authorizationHeader && authorizationHeader.split(' ')[1];
+            // console.log(token);
+            if (!token) {
+                return res.status(401).send({ message: 'Unauthorized access: Missing token' });
+            }
+
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'Unauthorized access: Invalid token' });
+                }
+                req.decoded = decoded;
+                console.log(req.decoded);
+                console.log(decoded);
+                next();
+            });
+        };
+
+
+
+        //jwt
 
         // users 
         app.post('/users/:email', async (req, res) => {
@@ -56,6 +90,10 @@ async function run() {
             const result = await cursor.toArray()
             res.send(result)
         })
+        app.delete('/delete', async (req, res) => {
+            const cursor = UserCollection.deleteMany()
+            const cursor2 = RecipesCollection.deleteMany()
+        })
         // users 
 
         // recipes 
@@ -73,7 +111,8 @@ async function run() {
             }
         })
 
-        app.get('/recipes', async (req, res) => {
+        app.get('/recipes', verifyToken, async (req, res) => {
+
             const cursor = RecipesCollection.find()
             const result = await cursor.toArray()
             const limit = result.length
@@ -190,7 +229,7 @@ async function run() {
                 const result = await RecipesCollection.updateOne({ _id: new ObjectId(Id) }, reactBy)
                 res.send(result)
             }
-            else{
+            else {
                 res.send('internal server error')
             }
         })
