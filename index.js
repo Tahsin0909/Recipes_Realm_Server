@@ -136,15 +136,15 @@ async function run() {
             const result = await RecipesCollection.findOne(query)
             const purchased = result.purchasedBy.find(data => data.email == body.email)
             const owner = result.purchasedBy.creatorEmail == body.email
-            if(purchased){
+            if (purchased) {
                 console.log(purchased);
-                res.send([result, {"status": "Purchased"}])
+                res.send([result, { "status": "Purchased" }])
             }
-            else if( owner){
-                res.send([result, {"status": "Owner"}])
+            else if (owner) {
+                res.send([result, { "status": "Owner" }])
             }
-            else{
-                res.send({"status": "404"})
+            else {
+                res.send({ "status": "404" })
             }
 
         })
@@ -255,6 +255,27 @@ async function run() {
             }
         })
         // recipes 
+
+        // payments 
+
+
+        app.put('/payment/:coins', async (req, res) => {
+            const coins = parseInt(req.params.coins)
+            const data = req.body
+            const query = { data }
+            // const filter = { _id: new ObjectId(Id) }
+            const isExist = await UserCollection.findOne({ email: data.email })
+            if (isExist) {
+                const addCoins = await UserCollection.updateOne({ email: data.email }, { $inc: { coin: coins } })
+                res.send(addCoins)
+            }
+            else {
+                res.send({ "logOut": true })
+            }
+        })
+
+
+        // payments 
 
 
 
