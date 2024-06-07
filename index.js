@@ -263,7 +263,7 @@ async function run() {
             const coins = parseInt(req.params.coins)
             const data = req.body
             const query = { data }
-            // const filter = { _id: new ObjectId(Id) }
+
             const isExist = await UserCollection.findOne({ email: data.email })
             if (isExist) {
                 const addCoins = await UserCollection.updateOne({ email: data.email }, { $inc: { coin: coins } })
