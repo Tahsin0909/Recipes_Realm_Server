@@ -117,7 +117,7 @@ async function run() {
             const result = await cursor.toArray()
             const limit = result.length
             const offset = parseInt(req.query.offset)
-            // console.log(offset);
+  
             if (limit >= offset) {
                 const newResult = result.slice(0, offset)
                 res.send(newResult)
@@ -231,7 +231,6 @@ async function run() {
             const isExist = await RecipesCollection.findOne(query)
 
             if (!isExist) {
-                // const isExist2 = await RecipesCollection.findOne(query2)
                 const reactBy = {
                     $push: {
                         reactBy: data
